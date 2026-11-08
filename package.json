@@ -1,0 +1,19 @@
+{
+  "name": "simulador-dijkstra-web-core",
+  "version": "0.1.0",
+  "description": "Motor JavaScript del simulador de Dijkstra (traducción de core/ de ProyectoMP v1.13). Sin dependencias.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "exports": {
+    ".": "./src/core/index.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:ui": "node --test tests_ui/interfaz.prueba.mjs",
+    "test:todo": "node --test && node --test tests_ui/interfaz.prueba.mjs",
+    "servir": "node tools/servir.mjs"
+  }
+}
