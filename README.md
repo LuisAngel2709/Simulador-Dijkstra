@@ -43,7 +43,7 @@ escritorio todo sigue como antes.
   y el resto se alcanza arrastrando o con zoom. «Ajustar grafo» siempre muestra el grafo completo.
 * **Gestos en el lienzo:** pellizco con dos dedos para acercar o alejar; un dedo desplaza el grafo cuando está ampliado o
   recortado, y arrastra el vértice que se toca (editor); con el grafo completo a la vista, un dedo en vertical
-  desplaza la página con normalidad. Zonas de toque ampliadas en vértices y pesos.
+  desplaza la página con normalidad. Zonas de toque ampliadas en vértices y pesos (el peso reacciona en un área de al menos 44 px aunque su recuadro mida ~10 px; un toque con temblor sigue siendo un toque y un arrastre desde un peso desplaza el grafo). En el campo del peso en línea, la tecla «Siguiente» del teclado numérico del celular confirma el peso (en escritorio, Enter).
 * **Controles:** botones de al menos 44 px, selectores a 16 px (evita el zoom automático de iOS), cabecera no fija y barra
   de navegación de una sola fila con Reiniciar, Ir al final y la tabla como iconos (con nombre accesible).
 * **Paneles:** «Más detalles» ocupa el ancho de la pantalla y la tarjeta del tutorial se limita al área visible.

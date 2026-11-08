@@ -15,6 +15,11 @@ import {
 } from "./layout.js";
 
 const UMBRAL_ARRASTRE = 4;
+// Con el dedo (o lápiz) un toque nunca es perfectamente quieto: hasta este movimiento (px) sigue siendo un toque y no un desplazamiento.
+const UMBRAL_TOQUE = 10;
+// Lado mínimo (px de pantalla) de la zona que reacciona al toque sobre el peso de una arista. El recuadro dibujado mide ~10 px en un
+// celular, muy por debajo de lo que un dedo acierta; la zona se ensancha sin cambiar lo que se ve.
+const ZONA_TACTIL_PESO = 44;
 // En pantallas estrechas (celulares) la vista inicial no baja de esta escala (px por unidad del mundo):
 // así los nodos, pesos y etiquetas siguen siendo legibles y el resto del grafo se alcanza con arrastre o zoom.
 const PISO_ESCALA = 0.65;
@@ -49,6 +54,8 @@ export class GrafoSvg {
     this._toques = new Map(); // punteros táctiles activos (pellizco de dos dedos)
     this._pinza = null;
     this._gestoActual = null;
+    this._tipoPuntero = "mouse"; // tipo del último puntero que presionó el lienzo: "mouse", "touch" o "pen"
+    this._gestoMovio = false; // el gesto actual ya desplazó el grafo o hizo pellizco: no cuenta como toque
     this.ajusteTodo = null; // la vista que muestra todo el contenido (puede ser más amplia que `ajuste`)
 
     this.svg = svg("svg", {
@@ -64,7 +71,11 @@ export class GrafoSvg {
     contenedor.classList.add("lienzo");
     contenedor.append(this.svg);
 
-    this.svg.addEventListener("pointerdown", (e) => { this._registrarToque(e); this._alPresionar(e); });
+    this.svg.addEventListener("pointerdown", (e) => {
+      this._registrarToque(e);
+      if (e.pointerType === "mouse" || this._toques.size < 2) { this._tipoPuntero = e.pointerType; this._gestoMovio = false; } // el 2.º dedo de un pellizco no reinicia el gesto
+      this._alPresionar(e);
+    });
     // `touch-action` no sirve sobre elementos internos del SVG: un dedo sobre un vértice se reserva aquí para arrastrarlo
     // (si no, el navegador empezaría a desplazar la página). El toque simple se resuelve en `_alPresionar`.
     this.svg.addEventListener("touchstart", (e) => { if (this.arrastrable && e.touches.length === 1 && e.target.closest?.("[data-v]")) e.preventDefault(); }, { passive: false });
@@ -226,14 +237,16 @@ export class GrafoSvg {
     const inicio = [e.clientX, e.clientY];
     const v0 = { ...this.vista };
     const [cw] = this._tamano();
+    const umbral = e.pointerType === "mouse" ? UMBRAL_ARRASTRE : UMBRAL_TOQUE;
     let moviendo = false;
     const mover = (ev) => {
       if (this._pinza) return;
       // Con el grafo completo a la vista, un dedo que se mueve en vertical desplaza la página, no el grafo.
       if (!moviendo && ev.pointerType === "touch" && !this.contenedor.classList.contains("lienzo--recortado")
         && Math.abs(ev.clientY - inicio[1]) > Math.abs(ev.clientX - inicio[0])) return;
-      if (!moviendo && Math.hypot(ev.clientX - inicio[0], ev.clientY - inicio[1]) < UMBRAL_ARRASTRE) return;
+      if (!moviendo && Math.hypot(ev.clientX - inicio[0], ev.clientY - inicio[1]) < umbral) return;
       moviendo = true;
+      this._gestoMovio = true;
       this.vistaManual = true;
       this.contenedor.classList.add("lienzo--desplazando");
       this.cerrarEditorPeso(false);
@@ -291,6 +304,7 @@ export class GrafoSvg {
 
   _iniciarPinza() {
     this._gestoActual?.(); // cancela el arrastre de un dedo en curso
+    this._gestoMovio = true;
     this.cerrarEditorPeso(false);
     const [cw] = this._tamano();
     const caja = this.svg.getBoundingClientRect();
@@ -582,7 +596,9 @@ export class GrafoSvg {
     if (e.button !== 0) return;
     const nodo = e.target.closest?.("[data-v]");
     if (!nodo) {
-      if (!e.target.closest?.("[data-peso]") && this.vista) this._iniciarDesplazamiento(e);
+      // Con ratón, empezar sobre un peso no desplaza. Con el dedo sí: la zona del peso es amplia y no debe bloquear el gesto
+      // (si el dedo se queda quieto es un toque y abre el editor del peso; si se mueve, desplaza el grafo).
+      if ((e.pointerType !== "mouse" || !e.target.closest?.("[data-peso]")) && this.vista) this._iniciarDesplazamiento(e);
       return;
     }
     const v = nodo.dataset.v;
@@ -633,6 +649,16 @@ export class GrafoSvg {
 
   _alHacerClic(e) {
     if (this._suprimirClic) return;
+    if (this._tipoPuntero !== "mouse" && this.alClicPeso && !e.target.closest?.("[data-v]")) {
+      // Toque: el peso se elige con una zona cómoda para el dedo (la del vértice, si se toca uno, manda). Un desplazamiento no abre nada.
+      if (this._gestoMovio) return;
+      const clave = this._pesoCercaDelDedo(e.clientX, e.clientY);
+      if (clave) {
+        const [u, v] = clave.split(">");
+        this.alClicPeso(u, v);
+        return;
+      }
+    }
     const peso = e.target.closest?.("[data-peso]");
     if (peso && this.alClicPeso) {
       const [u, v] = peso.dataset.peso.split(">");
@@ -641,6 +667,27 @@ export class GrafoSvg {
     }
     const nodo = e.target.closest?.("[data-v]");
     if (nodo && this.alClicNodo) this.alClicNodo(nodo.dataset.v);
+  }
+
+  /**
+   * Clave («U>V») del peso al que corresponde un toque en el punto de pantalla (x, y), o null. La zona de cada peso es su
+   * recuadro ensanchado hasta ZONA_TACTIL_PESO px de lado (en pantalla, sea cual sea el zoom); si el dedo cae en varias a la vez
+   * gana la de centro más cercano.
+   */
+  _pesoCercaDelDedo(x, y) {
+    const m = this.svg.getScreenCTM();
+    const pesos = this.ultimo?.rotulos.pesos;
+    if (!m || !pesos) return null;
+    let mejor = null;
+    let mejorD = Infinity;
+    for (const [clave, r] of pesos) {
+      const dx = Math.abs(x - (m.a * r.x + m.e));
+      const dy = Math.abs(y - (m.d * r.y + m.f));
+      if (dx > Math.max(r.w * m.a, ZONA_TACTIL_PESO) / 2 || dy > Math.max(r.h * m.d, ZONA_TACTIL_PESO) / 2) continue;
+      const d = Math.hypot(dx, dy);
+      if (d < mejorD) { mejor = clave; mejorD = d; }
+    }
+    return mejor;
   }
 
   _alMoverRaton(e) {
@@ -665,7 +712,7 @@ export class GrafoSvg {
     const r = this.ultimo?.rotulos.pesos.get(claveArista(u, v));
     if (!r) return;
     const entrada = el("input", {
-      clase: "peso-editor", type: "text", inputmode: "numeric", maxlength: 3, value: String(valorActual),
+      clase: "peso-editor", type: "text", inputmode: "numeric", enterkeyhint: "done", maxlength: 3, value: String(valorActual),
       "aria-label": `Nuevo peso de ${u} → ${v}`, "data-testid": "peso-editor",
     });
     const confirmar = () => {
@@ -686,6 +733,11 @@ export class GrafoSvg {
         ev.preventDefault();
         ev.stopPropagation();
         this.cerrarEditorPeso();
+      } else if (ev.key === "Tab" && !ev.shiftKey && window.matchMedia?.("(pointer: coarse)").matches) {
+        // En el teclado numérico del celular la tecla «Siguiente» manda Tab y no Enter: aquí confirma el peso en vez de saltar a otro campo.
+        ev.preventDefault();
+        ev.stopPropagation();
+        confirmar();
       }
     });
     entrada.addEventListener("input", () => entrada.classList.remove("peso-editor--error"));

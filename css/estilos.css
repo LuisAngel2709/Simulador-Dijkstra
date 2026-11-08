@@ -333,6 +333,7 @@ th.celda--cab:first-child, td.celda--cab { left: 0; z-index: 2; }
   .boton--pequeno { min-height: 40px; padding: 6px 12px; }
   .boton--icono, .lienzo__ajustar { width: 44px; height: 44px; }
   .campo, select.campo, input.campo { min-height: 44px; font-size: 16px; } /* 16 px evita el zoom automático de iOS al enfocar */
+  .peso-editor { font-size: 16px; } /* el campo del peso en línea también: sin zoom automático de iOS al abrirlo con un toque */
   .lienzo__tip { display: none; }
   /* Si el grafo se ve recortado (zoom o vista legible), un dedo lo desplaza; si se ve completo, el dedo desplaza la página. */
   .lienzo--recortado .grafo-svg { touch-action: none; }

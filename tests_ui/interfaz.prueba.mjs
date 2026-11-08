@@ -1137,6 +1137,82 @@ describe("móvil y táctil (390×844 y 360×640)", () => {
     await p.cerrar();
   });
 
+  async function editorConAristaTactil(p) {
+    await p.tap(t("empezar"));
+    await p.selectOption(t("num-nodos"), "7");
+    await p.tap(t("manual"));
+    await p.waitForSelector("[data-pantalla=editor]");
+    await p.waitForTimeout(400);
+    await p.tap(t("ajustar-grafo"));
+    await p.waitForTimeout(300);
+    await p.tap('.nodo[data-v="A"]'); await p.tap('.nodo[data-v="B"]');
+    await p.fill(t("peso-nuevo"), "5"); await p.tap(t("crear-conexion"));
+    await p.evaluate(() => document.querySelector(".lienzo").scrollIntoView({ block: "start" }));
+    await p.waitForTimeout(150);
+  }
+  const centroDe = (p, sel) => p.evaluate((q) => { const r = document.querySelector(q).getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }, sel);
+
+  test("táctil: tocar cerca del peso abre su editor y la tecla «Siguiente» del teclado numérico confirma el nuevo peso", async () => {
+    const p = await abrir({ ancho: 390, alto: 844, tactil: true });
+    await editorConAristaTactil(p);
+    const enviar = await toque(p);
+    const [x, y] = await centroDe(p, '[data-peso="A>B"] rect');
+    await enviar("touchStart", [[x + 17, y]]); await enviar("touchEnd", []); // 17 px al lado del recuadro (que mide ~10 px)
+    await p.waitForSelector(t("peso-editor"));
+    assert.equal(await p.locator(t("peso-editor")).getAttribute("enterkeyhint"), "done");
+    await p.fill(t("peso-editor"), "6");
+    await p.keyboard.press("Tab"); // Gboard: la tecla celeste «Siguiente» manda Tab, no Enter
+    await p.waitForTimeout(150);
+    assert.equal(await p.locator(t("peso-editor")).count(), 0);
+    assert.equal((await p.locator('[data-peso="A>B"] text').textContent()).trim(), "6");
+    assert.match(await texto(p, "lista-aristas"), /A → B\s+peso 6/);
+    assert.deepEqual(p.errores, []);
+    await p.cerrar();
+  });
+
+  test("táctil: un dedo que arrastra desde un peso desplaza el grafo y no abre el editor; un toque con temblor sí lo abre", async () => {
+    const p = await abrir({ ancho: 390, alto: 844, tactil: true });
+    await editorConAristaTactil(p);
+    const enviar = await toque(p);
+    const [cx, cy] = await centroDe(p, '[data-peso="A>B"] rect');
+    await enviar("touchStart", [[cx - 30, cy], [cx + 30, cy]]);
+    for (let i = 1; i <= 12; i++) { await enviar("touchMove", [[cx - 30 - i * 5, cy], [cx + 30 + i * 5, cy]]); await p.waitForTimeout(16); }
+    await enviar("touchEnd", []);
+    await p.waitForTimeout(200);
+    await p.evaluate(() => document.querySelector('[data-peso="A>B"]').scrollIntoView({ block: "center" }));
+    await p.waitForTimeout(150);
+    assert.match(await p.evaluate(() => document.querySelector(".lienzo").className), /lienzo--recortado/);
+    const [x, y] = await centroDe(p, '[data-peso="A>B"] rect');
+    const antes = (await medirVista(p)).vb;
+    await arrastrar(p, enviar, [x, y], [x - 40, y + 25]);
+    assert.notDeepEqual((await medirVista(p)).vb, antes, "el grafo se desplazó");
+    assert.equal(await p.locator(t("peso-editor")).count(), 0, "no se abrió el editor");
+    const [x2, y2] = await centroDe(p, '[data-peso="A>B"] rect');
+    const antes2 = (await medirVista(p)).vb;
+    await enviar("touchStart", [[x2, y2]]); await enviar("touchMove", [[x2 + 7, y2]]); await enviar("touchEnd", []);
+    await p.waitForTimeout(150);
+    assert.equal(await p.locator(t("peso-editor")).count(), 1, "el toque con 7 px de temblor abre el editor");
+    assert.deepEqual((await medirVista(p)).vb, antes2, "y no mueve la vista");
+    await p.cerrar();
+  });
+
+  test("escritorio con mouse: sin zona ampliada, Enter confirma y Tab no confirma el peso", async () => {
+    const p = await abrir({});
+    await aEditor(p, 7);
+    await conectar(p, "A", "B", 5);
+    await p.click('[data-peso="A>B"]');
+    await p.fill(t("peso-editor"), "6");
+    await p.keyboard.press("Tab");
+    assert.equal(await p.locator(t("peso-editor")).count(), 1, "Tab no confirma con mouse");
+    assert.equal((await p.locator('[data-peso="A>B"] text').textContent()).trim(), "5");
+    await p.fill(t("peso-editor"), "6"); await p.press(t("peso-editor"), "Enter");
+    assert.equal((await p.locator('[data-peso="A>B"] text').textContent()).trim(), "6");
+    const caja = await p.locator('[data-peso="A>B"] rect').boundingBox();
+    await p.mouse.click(caja.x + caja.width + 18, caja.y + caja.height / 2);
+    assert.equal(await p.locator(t("peso-editor")).count(), 0, "a 18 px del recuadro el mouse no abre nada");
+    await p.cerrar();
+  });
+
   test("el tutorial cabe en la pantalla y no se sale del área visible en ningún paso", async () => {
     for (const [ancho, alto] of PANTALLAS) {
       const p = await abrir({ ancho, alto, tactil: true });
