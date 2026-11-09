@@ -1,167 +1,230 @@
 # Simulador educativo del algoritmo de Dijkstra
 
-Aplicación de escritorio (Python + CustomTkinter) para aprender el problema del
-camino mínimo sobre **grafos dirigidos acíclicos** con pesos enteros positivos.
-No solo calcula la respuesta: muestra, paso a paso, cómo se etiquetan los
-vértices, por qué se elige cada uno y cuáles son **todos** los caminos mínimos.
+Aplicación de escritorio desarrollada en **Python y CustomTkinter** para aprender el problema del camino mínimo sobre grafos dirigidos acíclicos con pesos enteros positivos.
 
-La terminología sigue la *Lectura 5: Algoritmo de Dijkstra* (Matemática
-computacional, UPC): cada vértice recibe una etiqueta `[d, V]ₙ` con la distancia
-acumulada `d`, el vértice predecesor `V` y el número de iteración `n`.
+El simulador no solo calcula la solución: permite observar paso a paso cómo se etiquetan los vértices, por qué se selecciona cada uno y cómo se determinan todos los caminos mínimos.
+
+La terminología sigue la *Lectura 5: Algoritmo de Dijkstra* (Matemática Computacional, UPC). Cada vértice recibe una etiqueta `[d, V]ₙ`, donde `d` representa la distancia acumulada, `V` el vértice predecesor y `n` el número de iteración.
+
+## Versiones disponibles
+
+- **Versión web:** [Abrir simulador](https://luisangel2709.github.io/Simulador-Dijkstra/)
+- **Versión de escritorio:** Python + CustomTkinter (esta versión).
+
+## Características principales
+
+- **Creación de grafos:** permite generar grafos aleatorios o construirlos manualmente.
+- **Editor interactivo:** permite crear, eliminar y modificar conexiones, así como mover los vértices libremente.
+- **Simulación paso a paso:** muestra las etapas de selección y actualización del algoritmo de Dijkstra.
+- **Visualización de etiquetas:** representa las distancias acumuladas y los vértices predecesores.
+- **Múltiples caminos mínimos:** identifica y muestra todas las rutas que alcanzan la distancia mínima, incluyendo los casos de empate.
+- **Tabla de iteraciones:** permite consultar los cambios producidos en cada etapa de la ejecución.
+- **Explicaciones didácticas:** proporciona explicaciones breves y detalladas sobre cada paso.
+- **Modo tutorial:** ofrece un recorrido guiado por las pantallas de la aplicación y explica el funcionamiento del algoritmo.
+- **Tema claro y oscuro:** permite alternar entre ambos temas sin perder el estado de la simulación.
+- **Navegación por pasos:** permite avanzar, retroceder, reiniciar o ir directamente al resultado final.
 
 ## Requisitos
 
-- Python 3.10 o superior, con Tkinter incluido (en Linux: `sudo apt install python3-tk`)
-- CustomTkinter
+- Python 3.10 o superior.
+- Tkinter.
+- CustomTkinter.
+
+En Linux, si Tkinter no está instalado, puede instalarse mediante:
+
+```bash
+sudo apt install python3-tk
+```
+
+## Instalación y ejecución
+
+1. Descarga el proyecto desde este repositorio.
+2. Extrae los archivos y abre una terminal en la carpeta del proyecto.
+3. Instala las dependencias:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-La interfaz usa las fuentes *Segoe UI* y *Consolas* (presentes en Windows). En
-otros sistemas se sustituyen automáticamente por una fuente disponible.
-
-## Ejecución
-
-Desde la carpeta del proyecto:
+4. Ejecuta la aplicación:
 
 ```bash
 python main.py
 ```
 
+La interfaz utiliza las fuentes Segoe UI y Consolas, disponibles normalmente en Windows. En otros sistemas se sustituyen por fuentes disponibles.
+
+## Funcionamiento de la aplicación
+
+### 1. Bienvenida
+
+Desde la pantalla inicial se puede comenzar una nueva simulación.
+
+### 2. Configuración
+
+Selecciona la cantidad de vértices, entre 7 y 16, y elige cómo construir el grafo:
+
+- **Generar automáticamente:** crea un grafo dirigido acíclico con pesos positivos.
+- **Crear manualmente:** permite diseñar el grafo mediante el editor.
+
+### 3. Editor manual
+
+En el modo manual se pueden realizar las siguientes acciones:
+
+- Seleccionar un vértice de origen y otro de destino para crear una conexión.
+- Asignar un peso entero entre 1 y 99.
+- Mover los vértices para organizar visualmente el grafo.
+- Modificar el peso de una conexión haciendo clic sobre su etiqueta.
+- Eliminar conexiones existentes.
+- Restablecer la distribución inicial de los vértices.
+
+El editor valida las conexiones y rechaza aquellas que producirían ciclos, duplicados o pesos inválidos, mostrando mensajes explicativos.
+
+Al finalizar, se realiza una validación del grafo que identifica vértices aislados, vértices inaccesibles desde el origen y destinos inalcanzables. El usuario puede continuar o regresar al editor para realizar modificaciones.
+
+### 4. Simulación de Dijkstra
+
+Una vez configurado el grafo, se seleccionan el origen y el destino y se inicia la ejecución.
+
+Cada iteración se divide en dos subpasos:
+
+1. **Selección:** se elige el vértice no visitado con la menor distancia acumulada.
+2. **Actualización:** se revisan sus vecinos y se actualizan sus etiquetas cuando se encuentra una distancia menor o un camino alternativo de igual longitud.
+
+La simulación permite avanzar y retroceder entre los pasos, reiniciar el proceso o ir directamente al resultado final.
+
+La tabla de iteraciones y las explicaciones se actualizan de acuerdo con el paso seleccionado.
+
+### 5. Resultado
+
+Al finalizar se muestran:
+
+- La distancia mínima entre el origen y el destino.
+- La cantidad de caminos mínimos encontrados.
+- Todas las rutas que alcanzan esa distancia.
+- Las aristas correspondientes a los caminos mínimos resaltadas en el grafo.
+
+### 6. Funcionalidades adicionales
+
+- **Selección automática de extremos:** el simulador propone automáticamente el origen y el destino según la estructura del grafo. Si existen varias opciones, permite modificarlos manualmente.
+- **Validación del grafo:** identifica vértices aislados, inaccesibles y destinos que no pueden alcanzarse desde el origen.
+- **Edición de conexiones:** permite modificar pesos y eliminar conexiones sin reconstruir el grafo.
+- **Conservación del grafo:** al regresar desde la simulación al editor manual se mantiene la estructura y la posición de los vértices.
+- **Origen igual a destino:** contempla este caso especial, mostrando una distancia mínima de 0 y un camino formado únicamente por el vértice seleccionado.
+
+## Explicaciones y modo tutorial
+
+### Explicaciones de la simulación
+
+Cada paso cuenta con una explicación breve en el panel principal y una explicación extendida disponible mediante la ventana **Más detalles**.
+
+Esta última se actualiza al cambiar de paso y puede cerrarse con la tecla `Esc`.
+
+### Modo tutorial
+
+El botón **? Tutorial** permite realizar un recorrido guiado por las distintas pantallas de la aplicación:
+
+- Bienvenida.
+- Configuración.
+- Editor.
+- Simulación.
+
+El recorrido contiene 16 pasos: 11 relacionados con la interfaz y 5 dedicados al funcionamiento de Dijkstra.
+
+Cada paso resalta el elemento correspondiente y presenta una tarjeta con instrucciones y controles de navegación.
+
+El tutorial no modifica el grafo ni altera el estado de la simulación.
+
+## Tema claro y oscuro
+
+La aplicación permite alternar entre ambos temas mediante el botón ubicado en el encabezado.
+
+El cambio se realiza sin reconstruir la pantalla, por lo que se conservan el grafo, la tabla, la selección y el estado actual de la simulación.
+
+## Colores del grafo
+
+| Color | Significado |
+|---|---|
+| Verde claro | Vértice de origen |
+| Rosa | Vértice de destino |
+| Amarillo | Vértice seleccionado en el paso actual |
+| Azul claro | Vértice visitado |
+| Ámbar / naranja | Arista que se evalúa o produce un empate |
+| Verde intenso | Arista perteneciente a un camino mínimo |
+
+Las etiquetas descartadas aparecen tachadas en la tabla. Cuando existen varios predecesores con la misma distancia mínima, se muestran todos en la etiqueta del vértice.
+
+## Decisiones de diseño del algoritmo
+
+- **Predecesores múltiples:** cuando se encuentra una distancia estrictamente menor, se reemplazan los predecesores anteriores. Si la distancia es igual, se agrega el nuevo predecesor para conservar todos los caminos mínimos.
+- **Empates de selección:** se resuelven mediante orden alfabético. Esto determina el orden de procesamiento, pero no elimina caminos mínimos.
+- **Finalización del algoritmo:** no se detiene al seleccionar el destino, sino que procesa todos los vértices alcanzables para no perder posibles predecesores de igual distancia.
+- **Snapshots:** cada paso de la simulación representa un estado inmutable. La navegación hacia atrás muestra un estado anterior sin deshacer operaciones.
+- **Generación aleatoria:** construye grafos dirigidos acíclicos mediante capas, procurando reducir cruces y mantener una distribución visual legible.
+- **Validación:** se aceptan entre 7 y 16 vértices y pesos enteros entre 1 y 99.
+
+## Estructura del proyecto
+
+```text
+version-python/
+│
+├── main.py
+├── requirements.txt
+│
+├── core/
+│   ├── graph.py
+│   ├── dijkstra_engine.py
+│   ├── generator.py
+│   ├── explicaciones.py
+│   ├── extremos.py
+│   ├── tutorial_algoritmo.py
+│   └── ...
+│
+├── ui/
+│   ├── app.py
+│   ├── editor.py
+│   ├── simulation.py
+│   ├── graph_canvas.py
+│   ├── table.py
+│   ├── theme.py
+│   ├── tutorial.py
+│   └── ...
+│
+├── tests/
+│   └── ...
+│
+└── golden/
+    └── dijkstra_golden.json
+```
+
+### Arquitectura
+
+El proyecto separa la lógica del algoritmo de la interfaz gráfica.
+
+El paquete `core` contiene las estructuras del grafo, las validaciones, el motor de Dijkstra, la generación aleatoria y las explicaciones. No depende de CustomTkinter.
+
+El paquete `ui` contiene las ventanas, los componentes visuales, el editor, la simulación y los elementos de navegación.
+
+Esta separación permite probar la lógica del algoritmo independientemente de la interfaz.
+
 ## Pruebas
+
+El proyecto cuenta con una suite de pruebas automatizadas mediante `unittest`.
+
+Para ejecutarlas:
 
 ```bash
 python -m unittest discover -s tests -t .
 ```
 
-La suite tiene 290 pruebas (144 requieren pantalla y se omiten sin ella). Las del Core (grafo, Dijkstra, caminos, snapshots,
-generador) no necesitan interfaz. Las de la interfaz (`test_layout.py` en su parte
-de arrastre y `test_navegacion.py`) abren ventanas reales y requieren un entorno
-gráfico; en un Linux sin pantalla se ejecutan con `xvfb-run -a python -m unittest
-discover -s tests -t .`.
+La suite documentada contiene 290 pruebas. Algunas requieren un entorno gráfico para abrir ventanas reales, mientras que las pruebas del núcleo pueden ejecutarse sin interfaz.
 
-## Simulación: explicaciones, desplazamiento y «Más detalles»
+En Linux, las pruebas que necesitan pantalla pueden ejecutarse mediante Xvfb:
 
-- Cada paso tiene una explicación breve en el panel (qué hace, por qué, qué observar) y otra extendida en la ventana **Más detalles**, no modal, que se actualiza al cambiar de paso y se cierra con Esc. Ambas se calculan en `core/explicaciones.py` a partir de los snapshots del motor; no repiten la lógica de Dijkstra.
-- La página se desplaza con la rueda cuando el contenido no cabe; la barra de navegación queda fija. La tabla y los cuadros de texto con desbordamiento se desplazan por sí solos (Mayús + rueda: horizontal).
-- El grafo marca ORIGEN y DESTINO sobre los nodos elegidos, y el encabezado muestra «Camino mínimo: A → B» y el estado de la ejecución.
-
-## Modo tutorial
-
-El botón **? Tutorial** del encabezado (siempre visible, junto al selector de tema) inicia un recorrido guiado de la pantalla en la que estés: bienvenida, configuración, editor y simulación (16 pasos: 11 de interfaz y 5 sobre cómo funciona Dijkstra). Cada paso resalta el elemento explicado con un contorno de color y muestra una tarjeta junto a él con «Paso n de N», «Anterior», «Siguiente» y «Salir». Se puede repetir las veces que se quiera.
-
-- No toca la aplicación: no ejecuta, reinicia ni avanza la simulación, no abre «Más detalles» y no modifica el grafo. Se puede seguir editando o simulando mientras está abierto; cambiar de pantalla lo cierra.
-- Los ejemplos «En tu grafo» salen del motor (`core/tutorial_algoritmo.py` lee el resultado de la simulación en curso, o uno calculado aparte, y reutiliza `core/explicaciones.py`).
-- Tk no permite oscurecer parcialmente widgets hijos, así que la atención se dirige con el contorno y la tarjeta, sin velo.
-- Código: `ui/tutorial.py` (motor), `ui/tutorial_pasos.py` (contenido de cada pantalla).
-
-## Tema claro / oscuro
-
-El botón luna/sol del encabezado (esquina superior derecha, fuera de las pantallas) alterna el tema al instante sin reconstruir la pantalla: la simulación, el grafo, la tabla y la selección se conservan. Los colores de `ui/theme.py` son pares `(claro, oscuro)`; CustomTkinter los cambia con `set_appearance_mode()` y solo el canvas y la tabla (Tk puro) se repintan con `theme.resolver()`.
-
-## Uso
-
-1. **Bienvenida**: pulse *Empezar simulación*.
-2. **Configuración**: elija el número de nodos (7 a 16) y cómo crear el grafo:
-   *Generar automáticamente* o *Crear manualmente*.
-3. **Editor manual** (solo en modo manual):
-   - Haga clic en el vértice de origen y luego en el de destino; escriba el peso
-     (entero de 1 a 99) y pulse *Crear conexión*.
-   - Las conexiones que cerrarían un ciclo, las duplicadas y los pesos inválidos se
-     rechazan con un mensaje explicativo; el grafo anterior se conserva.
-   - Arrastre los nodos para ubicarlos a su gusto; *Restablecer* los devuelve a la
-     distribución circular inicial.
-   - En la lista de aristas puede cambiar un peso o eliminar una conexión.
-   - *Finalizar grafo* pasa a la simulación.
-4. **Simulación**: elija origen y destino, pulse *Ejecutar Dijkstra* y avance con
-   *Siguiente* / *Anterior*. También puede usar *Reiniciar* o *Ir al final*. Cada
-   iteración tiene dos subpasos: **selección** del vértice no visitado con menor
-   distancia acumulada y **actualización** de las etiquetas de sus vecinos. La
-   tabla del proceso (que puede ocultar) y el cuadro de explicación siempre
-   corresponden al paso que está viendo. Los nodos también se pueden arrastrar.
-5. **Resultado**: al llegar al final se muestran la distancia mínima, la cantidad
-   de caminos mínimos y todas las rutas, resaltadas en el grafo.
-6. **Volver**: el botón superior izquierdo depende de cómo creó el grafo.
-   - Grafo **manual**: *← Editar grafo* regresa al editor con el mismo grafo y los
-     nodos donde los dejó, para corregirlo o ampliarlo y volver a simular.
-   - Grafo **aleatorio**: *← Configuración* regresa a la pantalla de configuración
-     (no hay nada que editar).
-
-### Colores del grafo
-
-| Color | Significado |
-|---|---|
-| Verde claro | Vértice origen |
-| Rosa | Vértice destino |
-| Amarillo | Vértice seleccionado en el paso actual |
-| Azul claro | Vértice ya visitado |
-| Ámbar / naranja | Arista que se evalúa / arista que produce un empate |
-| Verde intenso | Arista de un camino mínimo (en el resultado final) |
-
-Las etiquetas descartadas aparecen tachadas en la tabla, y cuando hay empate el
-vértice muestra una etiqueta por cada predecesor.
-
-## Decisiones de diseño
-
-- **Predecesores múltiples**: si una distancia nueva es estrictamente menor se
-  reemplazan los predecesores; si es igual se agrega uno más. Así se conservan
-  todos los caminos mínimos.
-- **Empates de selección**: se resuelven por orden alfabético; esto afecta al orden
-  de procesamiento, no a los caminos encontrados.
-- **Fin del algoritmo**: no se detiene al seleccionar el destino, sino al procesar
-  todos los vértices alcanzables, para no perder predecesores de igual distancia.
-- **Snapshots**: cada paso es un estado inmutable. *Anterior* muestra el snapshot
-  previo; nunca "deshace" operaciones.
-- **Generación aleatoria**: el DAG se construye sobre capas explícitas, con pocas
-  aristas que salten capas y grados de entrada y salida acotados. Los pesos se
-  sortean entre 1 y 9 para que el grafo sea legible; el editor admite de 1 a 99.
-  Entre varios candidatos se prefiere uno con más de un camino mínimo.
-- **Layout**: los grafos aleatorios parten de una distribución por capas con
-  reducción de cruces (mediana); los manuales, de una distribución circular. En
-  ambos casos los nodos se pueden mover a mano y su posición se conserva.
-
-## Estructura
-
-```
-main.py                  punto de entrada
-core/graph.py            grafo dirigido, validaciones y detección de ciclos
-core/dijkstra_engine.py  algoritmo, predecesores múltiples, snapshots, caminos
-core/generator.py        generación aleatoria de DAG por capas
-ui/app.py                ventana principal, bienvenida, configuración y navegación
-ui/editor.py             editor manual del grafo
-ui/simulation.py         simulación paso a paso
-ui/graph_canvas.py       layout por capas, arrastre de nodos y dibujo del grafo
-ui/table.py              tabla del proceso de etiquetación
-ui/rueda.py              enrutador único de la rueda del ratón (por posición del puntero)
-ui/pagina_desplazable.py contenido de la simulación con desplazamiento vertical
-ui/texto_rico.py         texto con estilos para las explicaciones
-ui/detalles.py           ventana secundaria «Más detalles»
-core/explicaciones.py    explicaciones de cada paso, derivadas de los snapshots
-core/golden.py            exporta los casos de oro (golden/dijkstra_golden.json) para comparar con la versión web
-core/tutorial_algoritmo.py  ejemplos reales del motor para el tutorial
-core/extremos.py            origen/destino sugeridos y análisis de vértices aislados/inalcanzables
-ui/tutorial.py           motor del tutorial (resalte, tarjeta, navegación)
-ui/tutorial_pasos.py     pasos del tutorial de cada pantalla
-ui/theme.py              colores y fuentes
-ui/boton_tema.py         botón luna/sol del encabezado (tema claro/oscuro)
-tests/                   pruebas (unittest): tema, grafo, Dijkstra, caminos, snapshots,
-                         generador y layout, y navegación entre pantallas
+```bash
+xvfb-run -a python -m unittest discover -s tests -t .
 ```
 
-El paquete `core` no importa CustomTkinter: el algoritmo es independiente de la
-interfaz y puede ejecutarse o probarse por separado.
+## Autor
 
-## Mejoras del editor (v1.11)
-
-- **Origen y destino automáticos**: con una sola fuente y un solo sumidero se eligen solos; con varias opciones se propone una pareja válida y se puede cambiar. Tu selección manual se respeta al volver al editor y simular de nuevo (se olvida al crear otro grafo).
-- **Validación al finalizar**: avisa de vértices aislados, de vértices que el origen no alcanza y de un destino inalcanzable; permite «Continuar de todos modos» o «Volver al editor».
-- **Editar pesos con clic**: clic sobre el número de una arista abre un campo; Enter confirma, Esc cancela. Actualiza el gráfico y el panel lateral al instante.
-- **Origen = destino**: Dijkstra termina de inmediato tras etiquetar el origen (solo 2 pasos: inicio y resultado). Distancia 0, camino mínimo formado solo por ese vértice, sin selecciones ni actualizaciones, con mensaje explicativo; la tabla muestra solo la iteración 0.
-
-## Preparación para la versión web (v1.13)
-
-- **Casos de oro**: `golden/dijkstra_golden.json` contiene 32 grafos con todo lo que produce el motor (resultado, cada snapshot con su tabla, etiquetas y explicaciones, ejemplos del tutorial, extremos sugeridos y advertencias), más casos de validación y de truncamiento. Se regenera con `python -m core.golden` (desde esta carpeta). `∞` se escribe `null`. `tests/test_golden.py` comprueba que el motor actual lo reproduce exactamente; la versión web debe hacer lo mismo.
-- **Validación estricta**: pesos y número de nodos solo aceptan dígitos ASCII (`0-9`), con espacios ASCII alrededor tolerados. Se rechazan `+5`, `1_0`, dígitos Unicode (`٣`, `５`), `1e1`, etc. Rangos sin cambios (nodos 7–16, pesos 1–99).
-- **Una sola fuente de explicaciones**: los textos se construyen únicamente en `core/explicaciones.py`; `Snapshot` ya no guarda textos (`explicacion` se eliminó), solo datos.
-- **Truncamiento**: `truncado` solo es verdadero si existen más caminos mínimos que el límite (500). Con exactamente 500 no se trunca. Cubierto con 499, 500 y 501 caminos en `tests/test_truncamiento.py`.
+Desarrollado por: **[Nombre del autor]**.
