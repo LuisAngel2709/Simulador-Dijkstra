@@ -227,4 +227,4 @@ xvfb-run -a python -m unittest discover -s tests -t .
 
 ## Autor
 
-Desarrollado por: **[Nombre del autor]**.
+Desarrollado por: **Luis Angel Vilchez Valencia**.
