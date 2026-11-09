@@ -1,79 +1,269 @@
-# Simulador de Dijkstra — versión web (ProyectoMP v1.15)
+# Simulador de Dijkstra 
 
-Aplicación web **estática** (HTML + CSS + JavaScript + SVG), sin servidor, sin Pyodide, sin Flet y sin
-dependencias en tiempo de ejecución. Reutiliza el motor `src/core/` (traducción exacta de `core/` de Python v1.13);
-la interfaz solo dibuja lo que el motor calcula. La versión Python/CustomTkinter (`../simulador_dijkstra/`) no se toca.
+**Versión web 1.15**
 
-## Ejecutarla en local
+Simulador interactivo del algoritmo de Dijkstra diseñado para aprender y comprender cómo se obtiene el camino mínimo en un grafo dirigido y acíclico (DAG).
 
-Los módulos ES no se cargan con doble clic (`file://`); basta cualquier servidor estático:
+La aplicación permite crear grafos manualmente o generar ejemplos aleatorios, configurar un origen y un destino, y ejecutar el algoritmo paso a paso. Durante la simulación se visualizan las etiquetas, las actualizaciones de distancias, los vértices seleccionados y los caminos mínimos encontrados.
+
+Es una aplicación web estática desarrollada con **HTML, CSS y JavaScript**, que utiliza SVG para representar los grafos. No necesita un servidor backend ni dependencias durante su ejecución.
+
+## Acceso a la aplicación
+
+**[Abrir Simulador de Dijkstra](https://luisangel2709.github.io/Simulador-Dijkstra/)**
+
+## Características principales
+
+### 1. Creación y edición de grafos
+
+- Generación manual o aleatoria de grafos.
+- Compatibilidad con grafos de entre 7 y 16 vértices.
+- Creación de aristas dirigidas con pesos entre 1 y 99.
+- Edición de pesos directamente sobre el grafo.
+- Eliminación de aristas y modificación de la estructura.
+- Movimiento de vértices mediante arrastre, conservando sus posiciones.
+- Validación de ciclos, aristas duplicadas, bucles y pesos inválidos.
+- Advertencias sobre vértices aislados o que no pueden alcanzar el destino.
+
+### 2. Visualización del grafo
+
+- Distribución automática de vértices por niveles.
+- Reducción de cruces entre aristas.
+- Representación de aristas curvas para mejorar la lectura.
+- Pesos visibles en recuadros.
+- Identificación de los vértices de origen y destino.
+- Visualización de etiquetas del algoritmo con el formato `[d, V]ₙ`.
+- Identificación de etiquetas vigentes, empatadas y descartadas.
+- Reorganización de etiquetas al mover los vértices.
+- Ajuste automático del grafo al área disponible.
+
+También incluye controles para acercar, alejar, desplazar y ajustar la vista del grafo.
+
+### 3. Simulación paso a paso
+
+La aplicación permite seguir el desarrollo del algoritmo de Dijkstra mediante dos subpasos por iteración:
+
+1. Selección del vértice no visitado con la menor distancia conocida.
+2. Actualización de las distancias de sus vértices vecinos.
+
+Durante el proceso se puede:
+
+- Avanzar o retroceder entre los pasos.
+- Reiniciar la simulación.
+- Ir directamente al resultado final.
+- Utilizar las flechas del teclado para navegar.
+- Consultar la tabla de iteraciones.
+- Leer explicaciones sobre las operaciones realizadas.
+- Abrir una ventana con información adicional mediante «Más detalles».
+
+Al finalizar, se muestran todos los caminos mínimos encontrados, incluyendo los casos en los que existen varias rutas con la misma distancia.
+
+También se contemplan situaciones especiales, como un destino inalcanzable o cuando el origen y el destino son el mismo vértice.
+
+### 4. Tutorial interactivo
+
+Incluye una guía que acompaña al usuario por las principales secciones de la aplicación:
+
+- Bienvenida y configuración inicial.
+- Creación y edición del grafo.
+- Selección del origen y destino.
+- Desarrollo de la simulación.
+- Interpretación de los resultados.
+
+El tutorial utiliza ejemplos calculados con el grafo actual, sin modificar el estado de la simulación.
+
+### 5. Interfaz adaptable
+
+La aplicación incorpora:
+
+- Tema claro y oscuro, con transición visual.
+- Conservación de la preferencia de tema.
+- Compatibilidad con la configuración de apariencia del sistema.
+- Diseño adaptable a diferentes tamaños de pantalla.
+- Controles optimizados para pantallas táctiles.
+
+## Compatibilidad con dispositivos móviles
+
+La interfaz adapta su distribución para pantallas pequeñas sin alterar el funcionamiento de la versión de escritorio.
+
+Entre sus características móviles se encuentran:
+
+- Diseño reorganizado para aprovechar el espacio disponible.
+- Controles táctiles con áreas de interacción ampliadas.
+- Zoom mediante el gesto de pellizco.
+- Desplazamiento del grafo con un dedo cuando corresponde.
+- Edición de vértices y pesos mediante toques.
+- Controles de navegación accesibles.
+- Paneles y ventanas adaptados al ancho de la pantalla.
+
+**Pruebas realizadas:** emulación táctil en resoluciones de 390 × 844 y 360 × 640 píxeles, utilizando grafos de 7, 10 y 16 vértices.
+
+> La compatibilidad móvil se ha comprobado mediante emulación en Chromium. Todavía no se ha realizado una validación completa en dispositivos físicos con Safari o Firefox.
+
+## Tecnologías utilizadas
+
+| Tecnología | Uso |
+|---|---|
+| HTML5 | Estructura de la aplicación. |
+| CSS3 | Estilos, diseño adaptable y temas. |
+| JavaScript (ES Modules) | Lógica de la interfaz y comunicación con el motor. |
+| SVG | Representación gráfica de los vértices, aristas y etiquetas. |
+| Node.js | Ejecución de pruebas automatizadas. |
+| Playwright | Pruebas de interfaz y simulación de interacciones. |
+
+La aplicación no utiliza frameworks de interfaz ni requiere dependencias externas durante su ejecución.
+
+## Arquitectura del proyecto
+
+El proyecto separa el motor del algoritmo de la interfaz gráfica. De esta manera, los cálculos se realizan independientemente de cómo se representan los resultados en pantalla.
+
+```text
+simulador_dijkstra_web/
+│
+├── index.html
+├── .nojekyll
+├── package.json
+├── README.md
+├── README_MOTOR.md
+│
+├── css/
+│   └── estilos.css
+│
+├── src/
+│   ├── core/
+│   │   └── Motor del algoritmo y gestión del grafo
+│   │
+│   └── ui/
+│       ├── dom.js
+│       ├── tema.js
+│       ├── layout.js
+│       ├── grafo-svg.js
+│       ├── tabla.js
+│       ├── explicacion.js
+│       ├── dialogos.js
+│       ├── editor.js
+│       ├── simulacion.js
+│       ├── pantallas.js
+│       ├── tutorial.js
+│       ├── tutorial-pasos.js
+│       ├── app.js
+│       └── main.js
+│
+├── test/
+│   └── Pruebas del motor
+│
+├── tests_ui/
+│   └── Pruebas de interfaz
+│
+├── golden/
+│   └── Casos de referencia
+│
+└── tools/
+    └── Herramientas auxiliares
+```
+
+El directorio `src/core/` contiene el motor encargado de gestionar el grafo y calcular los caminos mínimos. El directorio `src/ui/` contiene los módulos responsables de la interacción, visualización y navegación.
+
+El motor JavaScript es una traducción del motor de la versión Python v1.13 y conserva su comportamiento mediante pruebas de comparación.
+
+## Ejecución local
+
+Para ejecutar el simulador en un entorno local, inicia un servidor HTTP desde la carpeta raíz del proyecto:
 
 ```bash
-cd simulador_dijkstra_web
-python -m http.server 8000      # o:  node tools/servir.mjs . 8000
-# abrir http://localhost:8000/
+python -m http.server 8000
 ```
 
-## Publicarla en GitHub Pages
+Luego accede desde tu navegador a `http://localhost:8000/`.
 
-* Opción A: sube esta carpeta como raíz del repositorio y en *Settings → Pages* elige «Deploy from a branch» (`/ (root)`).
-* Opción B: usa el flujo `.github/workflows/pages.yml` de este proyecto (publica la carpeta `simulador_dijkstra_web/`
-  con *Settings → Pages → Source: GitHub Actions*).
-
-Todas las rutas son relativas y hay un `.nojekyll`, así que funciona también en `https://usuario.github.io/repo/`.
-
-## Qué incluye
-
-| Área | Implementación |
-| --- | --- |
-| Editor | Clic en origen y destino para crear aristas; peso 1–99 con Enter; edición del peso en línea (clic sobre el número); botones Peso/Eliminar; arrastre de vértices con posiciones conservadas; «Restablecer» en círculo; rechazo de ciclos, duplicados, bucles y pesos inválidos (lo hace el motor); advertencias de vértices aislados / inalcanzables antes de simular |
-| Vista | El grafo se ajusta solo al área disponible (también al redimensionar); botón «Ajustar grafo» (icono de maximizar) en el lienzo; zoom con la rueda y desplazamiento arrastrando el fondo, siempre dentro del lienzo (el grafo nunca sale del todo de la vista); doble clic en el fondo también ajusta |
-| Grafo SVG | Capas de izquierda a derecha con reducción de cruces, aristas curvas que esquivan vértices, pesos en recuadro, marcas ORIGEN/DESTINO, etiquetas `[d, V]ₙ` y etiquetas descartadas tachadas, colocadas **sin solaparse** (hasta 16 vértices) y recolocadas al arrastrar |
-| Simulación | Los dos subpasos por iteración, Siguiente/Anterior/Reiniciar/Ir al final, flechas del teclado, tabla del proceso (vigente/empate/descartada), explicación breve y ventana «Más detalles», resultado con todos los caminos mínimos, origen = destino y destino inalcanzable |
-| Tutorial | Guía interactiva por pantalla (bienvenida, configuración, editor, simulación) con foco resaltado, textos de v1.13 y ejemplos reales calculados con tu grafo sin alterar la simulación |
-| UX | Tema claro/oscuro con transición (recuerda la elección y respeta el del sistema); diseño responsive con prioridad en escritorio y adaptación a celulares (ver abajo) |
-
-## Celulares y pantallas táctiles
-
-Con el ancho de un celular (probado en 390×844 y 360×640, con 7, 10 y 16 vértices) la interfaz cambia así; en
-escritorio todo sigue como antes.
-
-* **Legibilidad:** en pantallas estrechas el grafo no se encoge hasta que el texto sea ilegible. La vista inicial usa una
-  escala mínima de 0,65 (etiquetas y pesos de unos 8,5 px); si el grafo no cabe a esa escala se ve la parte izquierda
-  y el resto se alcanza arrastrando o con zoom. «Ajustar grafo» siempre muestra el grafo completo.
-* **Gestos en el lienzo:** pellizco con dos dedos para acercar o alejar; un dedo desplaza el grafo cuando está ampliado o
-  recortado, y arrastra el vértice que se toca (editor); con el grafo completo a la vista, un dedo en vertical
-  desplaza la página con normalidad. Zonas de toque ampliadas en vértices y pesos (el peso reacciona en un área de al menos 44 px aunque su recuadro mida ~10 px; un toque con temblor sigue siendo un toque y un arrastre desde un peso desplaza el grafo). En el campo del peso en línea, la tecla «Siguiente» del teclado numérico del celular confirma el peso (en escritorio, Enter).
-* **Controles:** botones de al menos 44 px, selectores a 16 px (evita el zoom automático de iOS), cabecera no fija y barra
-  de navegación de una sola fila con Reiniciar, Ir al final y la tabla como iconos (con nombre accesible).
-* **Paneles:** «Más detalles» ocupa el ancho de la pantalla y la tarjeta del tutorial se limita al área visible.
-
-Límites conocidos: solo se ha probado con Chromium (emulación táctil), no con Safari ni Firefox en un celular real; en el
-editor de un celular el grafo parte recortado (usa «Ajustar grafo» para verlo entero); en el tutorial la tarjeta puede
-tapar parte del elemento resaltado cuando este ocupa casi toda la pantalla.
-
-## Estructura
-
-```
-index.html  css/estilos.css  .nojekyll
-src/core/   motor (sin cambios respecto a v1.14)
-src/ui/     dom.js  tema.js  layout.js (puro)  grafo-svg.js  tabla.js  explicacion.js  dialogos.js
-            editor.js  simulacion.js  pantallas.js  tutorial.js  tutorial-pasos.js  app.js  main.js
-test/       83 pruebas del motor (node --test, sin dependencias)
-tests_ui/   47 pruebas de interfaz (Playwright + Chromium)
-```
-
-## Pruebas
+También puedes utilizar Node.js con el servidor incluido:
 
 ```bash
-npm test          # 83 pruebas del motor, incluye los 32 casos de oro de Python (no necesita instalar nada)
-npm run test:ui   # 47 pruebas de interfaz; requiere Playwright:  npm i -D playwright && npx playwright install chromium
-npm run test:todo # ambas
+node tools/servir.mjs . 8000
 ```
 
-Las pruebas de interfaz recorren los flujos del editor y la simulación, vigilan la consola del navegador (cualquier
-error o aviso hace fallar la prueba), comprueban temas y tutorial, miden solapes en pantalla con grafos de 7 a 16
-vértices y comparan **paso a paso** (título, explicación, tabla y colores de aristas) lo que muestra la pantalla con
-los 32 casos de oro de Python v1.13. Las pruebas móviles emulan un celular táctil (390×844 y 360×640) y envían gestos reales de uno y dos dedos.
+> La aplicación utiliza módulos JavaScript ES, por lo que debe ejecutarse mediante un servidor HTTP y no abriendo directamente `index.html`.
 
-Documentación del motor: `README_MOTOR.md`.
+## Despliegue
+
+La aplicación está publicada mediante **GitHub Pages**, por lo que puede utilizarse directamente desde el navegador, sin instalaciones ni configuraciones adicionales.
+
+**[Acceder al simulador](https://luisangel2709.github.io/Simulador-Dijkstra/)**
+
+El proyecto también puede desplegarse desde un repositorio propio utilizando GitHub Pages y sus rutas relativas.
+
+## Pruebas y validación
+
+El proyecto cuenta con pruebas automatizadas para verificar el comportamiento del motor y de la interfaz.
+
+| Tipo de prueba | Cantidad | Herramienta |
+|---|---:|---|
+| Pruebas del motor | 83 | Node.js Test Runner |
+| Pruebas de interfaz | 47 | Playwright |
+| **Total** | **130** | — |
+
+### Ejecutar las pruebas del motor
+
+No requieren instalar dependencias adicionales:
+
+```bash
+npm test
+```
+
+### Ejecutar las pruebas de interfaz
+
+Primero instala Playwright y Chromium:
+
+```bash
+npm i -D playwright
+npx playwright install chromium
+```
+
+Después ejecuta:
+
+```bash
+npm run test:ui
+```
+
+### Ejecutar todas las pruebas
+
+```bash
+npm run test:todo
+```
+
+Las pruebas verifican, entre otros aspectos:
+
+- Creación y validación de grafos.
+- Cálculo de distancias y caminos mínimos.
+- Coincidencia con los 32 casos de referencia de Python v1.13.
+- Funcionamiento del editor y la simulación.
+- Navegación entre iteraciones.
+- Temas y tutorial interactivo.
+- Solapamientos de elementos gráficos.
+- Interacciones táctiles y adaptación móvil.
+- Ausencia de errores y advertencias en la consola del navegador.
+
+## Relación con la versión de escritorio
+
+ProyectoMP también cuenta con una versión de escritorio desarrollada en **Python y CustomTkinter**.
+
+Ambas versiones comparten el mismo propósito educativo y la lógica del algoritmo, pero utilizan interfaces y tecnologías diferentes.
+
+| Versión | Tecnologías |
+|---|---|
+| Web | HTML, CSS, JavaScript y SVG |
+| Escritorio | Python y CustomTkinter |
+
+La versión web no utiliza Pyodide ni ejecuta Python en el navegador. Su motor está implementado directamente en JavaScript.
+
+La versión Python es independiente y no se modifica al desarrollar la versión web.
+
+## Documentación adicional
+
+Para conocer con mayor profundidad la implementación y el funcionamiento interno del algoritmo, consulta:
+
+- `README_MOTOR.md`: documentación técnica del motor de Dijkstra.
+
+Autor
+
+Desarrollado por: Luis Angel Vilchez Valencia.
